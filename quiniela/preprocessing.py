@@ -1,9 +1,11 @@
 import pandas as pd
+import numpy as np
 
-def _process_scores(self, df: pd.DataFrame) -> pd.DataFrame:
+
+def _process_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
     Process the score column and calculate derived features.
-    
+
     :param df: Input DataFrame with score column
     :return: DataFrame with processed score columns
     """
@@ -14,10 +16,11 @@ def _process_scores(self, df: pd.DataFrame) -> pd.DataFrame:
     df["difference_score"] = abs(df["home_score"] - df["away_score"])
     return df
 
-def _calculate_match_results(self, df: pd.DataFrame) -> pd.DataFrame:
+
+def _calculate_match_results(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate match results and create result indicators.
-    
+
     :param df: Input DataFrame with processed scores
     :return: DataFrame with added result columns
     """
@@ -26,22 +29,20 @@ def _calculate_match_results(self, df: pd.DataFrame) -> pd.DataFrame:
     df["tie"] = (df["home_score"] == df["away_score"]).astype(int)
 
     # Create final result column (-1: away win, 0: tie, 1: home win)
-    conditions = [
-        (df["home_win"] == 1),
-        (df["tie"] == 1),
-        (df["away_win"] == 1)
-    ]
+    conditions = [(df["home_win"] == 1), (df["tie"] == 1), (df["away_win"] == 1)]
     choices = [1, 0, -1]
     df["result"] = np.select(conditions, choices, default=None)
     return df
 
-def _normalize_dates(self, df: pd.DataFrame) -> pd.DataFrame:
+
+def _normalize_dates(df: pd.DataFrame) -> pd.DataFrame:
     """
     Normalize dates by appending the correct century based on the season information.
-    
+
     :param df: DataFrame containing 'date' and 'season' columns
     :return: DataFrame with normalized dates
     """
+
     def adjust_date(row: pd.Series) -> str:
         """Adjust a date entry to include the full year based on the season context."""
         start_year, end_year = map(int, row["season"].split("-"))
@@ -55,10 +56,11 @@ def _normalize_dates(self, df: pd.DataFrame) -> pd.DataFrame:
     df["date"] = pd.to_datetime(df["date"], format="%m/%d/%Y")
     return df
 
-def _process_seasons(self, df: pd.DataFrame) -> pd.DataFrame:
+
+def _process_seasons(df: pd.DataFrame) -> pd.DataFrame:
     """
     Process season information to extract the starting year.
-    
+
     :param df: Input DataFrame with season column
     :return: DataFrame with processed season column
     """

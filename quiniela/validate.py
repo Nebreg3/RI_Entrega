@@ -1,3 +1,14 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import pandas as pd
+from sklearn.metrics import (
+    confusion_matrix,
+    precision_recall_fscore_support,
+    classification_report,
+)
+
+
 def plot_feature_importance(feature_importance, figsize=(12, 8)):
     """
     Creates an enhanced feature importance visualization
@@ -99,4 +110,3 @@ def analyze_model_performance(feature_importance, y_true, y_pred, clf):
 
     accuracy = (y_true == y_pred).mean()
     print(f"\nOverall Model Accuracy: {accuracy:.3f}")
-

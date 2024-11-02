@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def calculate_team_results(df, max_matchday=None):
     """
     Calculates team results up to a specific matchday.
@@ -58,6 +61,7 @@ def calculate_team_results(df, max_matchday=None):
     ]
     return df_results
 
+
 def team_confrontations(df, team1, team2):
     """
     Returns the confrontations between two teams
@@ -103,3 +107,10 @@ def lost_games(df, team: str):
     ) & (df["tie"] == 1)
 
     return df[(home_lost | away_lost) & ~tie_games]
+
+
+def quiniela_format(df):
+    df[["date", "home_team", "away_team", "result", "prediction", "correct"]]
+    df["result"] = df["result"].map({1: "1", 0: "X", -1: "2"})
+    df["prediction"] = df["prediction"].map({1: "1", 0: "X", -1: "2"})
+    return df
