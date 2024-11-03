@@ -21,25 +21,24 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import LabelEncoder
 
-
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Project-specific imports
-from utils import quiniela_format
-from preprocessing import (
+from .utils import quiniela_format
+from .preprocessing import (
     _process_scores,
     _calculate_match_results,
     _normalize_dates,
     _process_seasons,
 )
-from data_io import load_historical_data, load_matchday
-from features import (
+from .data_io import load_historical_data, load_matchday
+from .features import (
     inform_relatives_points,
     inform_win_lost_index,
     last5index,
     last_season_position,
 )
-from validate import analyze_model_performance
+from .validate import analyze_model_performance
 import settings
 
 
@@ -82,7 +81,7 @@ class QuinielaModel:
         return processed_df
 
     def calculate_features(
-        self, df: pd.DataFrame, start_season, nseasons, index_depth=20, train=True
+        self, df: pd.DataFrame, start_season, nseasons
     ) -> pd.DataFrame:
         """
         Calculate features for the input DataFrame.
@@ -93,51 +92,51 @@ class QuinielaModel:
         :param index_depth: Depth of the index to consider for win and loss calculations
         :return: DataFrame with calculated features
         """
-        if index_depth > nseasons:
-            index_depth = nseasons
 
-        if train:
-            df_train = df.loc[
-                (df["season"] > (start_season - nseasons))
-                & (df["season"] <= start_season)
-            ].copy()
-        else:
-            df_train = df.loc[
-                (df["season"] > (start_season - nseasons))
-                & (df["season"] < start_season)
-            ].copy()
-        logging.info(f"Calculating features for {len(df_train)} matches")
+        # if train:
+        #     df_predict = df.loc[
+        #         (df["season"] > (start_season - nseasons))
+        #         & (df["season"] <= start_season)
+        #     ].copy()
+        # elif predict:
+        #     df_predict = df.loc[
+        #         (df["season"] == season_to_predict)
+        #         & (df["matchday"] == matchday_to_predict)
+        #         & (df["division"] == 1)
+        #     ].copy()
+
+        logging.info(f"Calculating features for {len(df)} matches")
         start_time = time.time()
         logging.info("Calculating relative points")
-        df_train = inform_relatives_points(df, df_train)
+        df_predict = inform_relatives_points(df, df_predict)
         logging.info(
             f"Relative points calculated in {time.time() - start_time:.2f} seconds"
         )
 
         start_time = time.time()
         logging.info("Calculating win and loss index")
-        df_train = inform_win_lost_index(df, df_train, index_depth)
+        df_predict = inform_win_lost_index(df, df_predict, nseasons)
         logging.info(
             f"Win and loss index calculated in {time.time() - start_time:.2f} seconds"
         )
 
         start_time = time.time()
         logging.info("Calculating last 5 index")
-        df_train = last5index(df, df_train)
+        df_predict = last5index(df, df_predict)
         logging.info(
             f"Last 5 index calculated in {time.time() - start_time:.2f} seconds"
         )
 
         start_time = time.time()
         logging.info("Calculating last season position")
-        df_train = last_season_position(df, df_train)
+        df_predict = last_season_position(df, df_predict)
         logging.info(
             f"Last season position calculated in {time.time() - start_time:.2f} seconds"
         )
 
-        return df_train
+        return df_predict
 
-    def train(self, df_train: pd.DataFrame, model_name="my_quiniela.model"):
+    def train(self, df_train: pd.DataFrame):
         """Train the model on provided data."""
 
         x_train = df_train[self.FEATURES]
@@ -152,9 +151,6 @@ class QuinielaModel:
 
         clf = GradientBoostingClassifier()
         clf.fit(x_train, y_train)
-
-        self.save(model_name)
-        logging.info(f"Model saved as {model_name}")
 
         return clf, x_val, y_val
 
@@ -178,17 +174,8 @@ class QuinielaModel:
     ) -> pd.DataFrame:
         """Generate predictions on the provided data."""
 
-        if train:
-            df = load_historical_data(season, depth)
-        else:
-            df = load_matchday(season, 1, matchday)
+        df = load_matchday(season, 1, matchday)
         df = self.preprocess(df)
-        season = int(season.split("/")[0])
-        df_matchday = df.loc[
-            (df["season"] == season)
-            & (df["matchday"] == matchday)
-            & (df["division"] == 1)
-        ].copy()
         df_matchday = self.calculate_features(df, df_matchday, season, depth, False)
         x_predict = df_matchday[self.FEATURES]
 
@@ -215,24 +202,26 @@ class QuinielaModel:
             pickle.dump(self, f)
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    model = QuinielaModel()
-    # Un argument ha de ser nseasons
-    nseasons = 2
-    df = load_historical_data("2004/2005", nseasons)
-    logging.info("Data loaded")
-    processed_df = model.preprocess(df)
-    logging.info("Processed data")
-    logging.info("Starting to calculate features")
-    df_train = model.calculate_features(
-        processed_df, 2004, nseasons
-    )  # Revisar arguments q paso
-    logging.info("Features calculated")
-    logging.info("Starting to train model")
-    clf, x_val, y_val = model.train(df_train, "Test.model")
-    model.validate(clf, x_val, y_val)
+# if __name__ == "__main__":
+#     logging.basicConfig(level=logging.INFO)
+#     model = QuinielaModel()
+#     # Un argument ha de ser nseasons
+#     nseasons = 2
+#     df = load_historical_data("2004/2005", nseasons)
+#     logging.info("Data loaded")
+#     processed_df = model.preprocess(df)
+#     logging.info("Processed data")
+#     logging.info("Starting to calculate features")
+#     df_train = model.calculate_features(
+#         processed_df, 2004, nseasons
+#     )  # Revisar arguments q paso
+#     logging.info("Features calculated")
+#     logging.info("Starting to train model")
+#     clf, x_val, y_val = model.train(df_train)
+#     model.save(model_name)
+#     logging.info(f"Model saved as {model_name}")
+#     model.validate(clf, x_val, y_val)
 
-    logging.info("Example prediction")
-    df_matchday = model.predict_result("2005/2006", 1, nseasons)
-    logging.info(df_matchday)
+#     logging.info("Example prediction")
+#     df_matchday = model.predict_result("2005/2006", 1, nseasons)
+#     logging.info(df_matchday)
