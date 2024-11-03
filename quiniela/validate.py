@@ -1,6 +1,21 @@
+"""
+This module contains utility functions for model validation and performance analysis.
+"""
+
+import os
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import (
+    confusion_matrix,
+    precision_recall_fscore_support,
+    classification_report,
+)
 def plot_feature_importance(feature_importance, figsize=(12, 8)):
     """
-    Creates an enhanced feature importance visualization
+    Creates an enhanced feature importance visualization with more detailed labels.
 
     :param feature_importance: DataFrame with feature importance values
     :param figsize: Figure size
@@ -29,16 +44,20 @@ def plot_feature_importance(feature_importance, figsize=(12, 8)):
     plt.ylabel("Features")
     plt.title("Feature Importance Analysis", pad=20)
 
+    # Add gridlines and invert y-axis for better readability
     plt.grid(axis="x", linestyle="--", alpha=0.7)
     plt.gca().invert_yaxis()
 
-    plt.tight_layout()
-    plt.show()
+    # Customize the plot with a more descriptive title and axis labels
+    plt.title("Feature Importance: Top Contributors to Model Predictions")
+    plt.xlabel("Importance Score")
+    plt.ylabel("Feature")
 
+    plt.tight_layout()
 
 def plot_confusion_matrix_analysis(y_true, y_pred, clf, figsize=(15, 5)):
     """
-    Creates a comprehensive confusion matrix analysis with metrics
+    Creates a comprehensive confusion matrix analysis with metrics and additional insights.
 
     :param y_true: True labels
     :param y_pred: Predicted labels
@@ -77,26 +96,31 @@ def plot_confusion_matrix_analysis(y_true, y_pred, clf, figsize=(15, 5)):
     ax2.set_title("Performance Metrics by Class")
 
     plt.tight_layout()
-    plt.show()
 
-    print("\nDetailed Classification Report:")
-    print(classification_report(y_true, y_pred, target_names=class_names))
-
-
-def analyze_model_performance(feature_importance, y_true, y_pred, clf):
+def analyze_model_performance(feature_importance, y_true, y_pred, clf, save_dir="validation"):
     """
-    Performs comprehensive model analysis
+    Performs comprehensive model analysis, saving plots and results.
 
     :param feature_importance: DataFrame with feature importance values
     :param y_true: True labels
     :param y_pred: Predicted labels
     :param clf: Classifier used for prediction
+    :param save_dir: Directory to save plots and results (default: "validation")
     """
-    print("=== Model Performance Analysis ===\n")
+
+    # Create the directory if it doesn't exist
+    os.makedirs(save_dir, exist_ok=True)
 
     plot_feature_importance(feature_importance)
+    feature_importance_filepath = os.path.join(save_dir, "feature_importance.png")
+    plt.savefig(feature_importance_filepath)
+    plt.close()
+
     plot_confusion_matrix_analysis(y_true, y_pred, clf)
-
-    accuracy = (y_true == y_pred).mean()
-    print(f"\nOverall Model Accuracy: {accuracy:.3f}")
-
+    confusion_matrix_filepath = os.path.join(save_dir, "confusion_matrix.png")
+    plt.savefig(confusion_matrix_filepath)
+    report = classification_report(y_true, y_pred)
+    report_df = pd.DataFrame(classification_report(y_true, y_pred, output_dict=True)).transpose()
+    report_csv_filepath = os.path.join(save_dir, "classification_report.csv")
+    report_df.to_csv(report_csv_filepath, index=True)
+    plt.close()
