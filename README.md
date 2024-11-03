@@ -1,6 +1,9 @@
 ## LaQuiniela of LaLiga
 
-Team members: *Néstor Bravo Egea NIU = 1563318* - *Juan Manuel Sánchez Melián NIU = 1598286* - *Jose Carlos Sanz Tirado NIU = 1742458* - *Biel Majó Cornet NIU = 1568210*
+Team members: *Néstor Bravo Egea NIU = 1563318* 
+*Juan Manuel Sánchez Melián NIU = 1598286*
+*Jose Carlos Sanz Tirado NIU = 1742458* 
+*Biel Majó Cornet NIU = 1568210*
 
 This repo contains the skeleton for you to build your first ML project. Use the data in ```laliga.sqlite``` to build a ML model that predicts the outcome of a matchday in LaLiga (Spanish Football League).
 
