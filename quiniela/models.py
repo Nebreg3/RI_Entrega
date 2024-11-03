@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import LabelEncoder
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from .utils import quiniela_format
 from .preprocessing import (
@@ -73,7 +73,7 @@ class QuinielaModel:
         return processed_df
 
     def calculate_features(
-        self, df: pd.DataFrame, df_features, depth: int = float('inf')
+        self, df: pd.DataFrame, df_features, depth: int = float("inf")
     ) -> pd.DataFrame:
         """
         Calculate features for the input DataFrame.
@@ -153,9 +153,9 @@ class QuinielaModel:
     def predict(self, df_matchday: pd.DataFrame) -> pd.DataFrame:
         """
         Generate predictions on the provided data.
-        
+
         :param df_matchday: DataFrame with matchday data
-        
+
         :return: DataFrame with predictions
         """
 
@@ -165,7 +165,18 @@ class QuinielaModel:
         df_matchday["prediction"] = y_predict
         df_matchday["correct"] = df_matchday["result"] == df_matchday["prediction"]
         df_matchday = quiniela_format(df_matchday)
-        df_matchday = df_matchday[["season", "division", "matchday", "home_team", "away_team", "result", "prediction", "correct"]] #Comment this line to see all columns and features calculated.
+        df_matchday = df_matchday[
+            [
+                "season",
+                "division",
+                "matchday",
+                "home_team",
+                "away_team",
+                "result",
+                "prediction",
+                "correct",
+            ]
+        ]  # Comment this line to see all columns and features calculated.
 
         return df_matchday
 

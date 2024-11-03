@@ -3,6 +3,7 @@ import pandas as pd
 
 pd.options.mode.chained_assignment = None  # default='warn' #UPSI
 
+
 def _process_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
     Process the score column and calculate derived features.

@@ -13,6 +13,8 @@ from sklearn.metrics import (
     precision_recall_fscore_support,
     classification_report,
 )
+
+
 def plot_feature_importance(feature_importance, figsize=(12, 8)):
     """
     Creates an enhanced feature importance visualization with more detailed labels.
@@ -54,6 +56,7 @@ def plot_feature_importance(feature_importance, figsize=(12, 8)):
     plt.ylabel("Feature")
 
     plt.tight_layout()
+
 
 def plot_confusion_matrix_analysis(y_true, y_pred, clf, figsize=(15, 5)):
     """
@@ -97,7 +100,10 @@ def plot_confusion_matrix_analysis(y_true, y_pred, clf, figsize=(15, 5)):
 
     plt.tight_layout()
 
-def analyze_model_performance(feature_importance, y_true, y_pred, clf, save_dir="validation"):
+
+def analyze_model_performance(
+    feature_importance, y_true, y_pred, clf, save_dir="validation"
+):
     """
     Performs comprehensive model analysis, saving plots and results.
 
@@ -120,7 +126,9 @@ def analyze_model_performance(feature_importance, y_true, y_pred, clf, save_dir=
     confusion_matrix_filepath = os.path.join(save_dir, "confusion_matrix.png")
     plt.savefig(confusion_matrix_filepath)
     report = classification_report(y_true, y_pred)
-    report_df = pd.DataFrame(classification_report(y_true, y_pred, output_dict=True)).transpose()
+    report_df = pd.DataFrame(
+        classification_report(y_true, y_pred, output_dict=True)
+    ).transpose()
     report_csv_filepath = os.path.join(save_dir, "classification_report.csv")
     report_df.to_csv(report_csv_filepath, index=True)
     plt.close()
