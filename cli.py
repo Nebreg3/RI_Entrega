@@ -29,6 +29,13 @@ train_parser.add_argument(
     action="store_true",
     help="Validate the model after training.",
 )
+train_parser.add_argument(
+    "--depth",
+    type=int,
+    default=20,
+    help="Depth of index win_lose calculation.",
+)
+
 predict_parser = task_subparser.add_parser("predict")
 predict_parser.add_argument(
     "predict_season",
@@ -54,7 +61,6 @@ predict_parser.add_argument(
 if __name__ == "__main__":
     args = parser.parse_args()
     
-    # Ensure args.task is not None
     if args.task is None:
         parser.print_help()
         exit(1)
@@ -69,29 +75,60 @@ if __name__ == "__main__":
     if args.task == "train":
         logging.info(f"Training LaQuiniela model starting in seasons {args.train_season} with {args.train_nseasons} previous seasons")
         model = models.QuinielaModel()
-        training_data = data_io.load_historical_data(args.train_season, args.train_nseasons)
+
+        all_data = data_io.load_data()
         logging.info("Data loaded")
-        processed_df = model.preprocess(training_data)
-        logging.info("Processed data")
+
+        processed_df = model.preprocess(all_data)        
+        args.train_season = int(args.train_season.split("/")[0])
+        training_data = processed_df.loc[
+                (processed_df["season"] > (args.train_season - args.train_nseasons))
+                & (processed_df["season"] <= args.train_season)
+            ].copy()
+        logging.info("Data processed")
+
         logging.info("Starting to calculate features")
         df_features = model.calculate_features(
-            processed_df, args.train_season, args.train_nseasons
+            processed_df, training_data, args.depth
         ) 
         logging.info("Features calculated")
+
         logging.info("Starting to train model")
         clf, x_val, y_val = model.train(df_features)
+
         model.save(settings.MODELS_PATH / args.model_name)
-        logging.info(f"Model successfully trained and saved in {settings.MODELS_PATH / args.model_name}")
+        logging.info(f"Model successfully trained and saved in {settings.MODELS_PATH / args.model_name}.pkl")
         if args.validate:
             model.validate(clf, x_val, y_val)
 
     elif args.task == "predict":
         logging.info(f"Predicting matchday {args.predict_matchday} in season {args.predict_season}, division {args.predict_division}")
         model = models.QuinielaModel.load(settings.MODELS_PATH / args.model_name)
-        predict_data = data_io.load_matchday(args.predict_season, args.predict_division, args.predict_matchday)
-        predict_data["pred"] = model.predict(predict_data)
-        print(f"Matchday {args.predict_matchday} - LaLiga - Division {args.predict_division} - Season {args.predict_season}")
-        print("=" * 70)
-        for _, row in predict_data.iterrows():
-            print(f"{row['home_team']:^30s} vs {row['away_team']:^30s} --> {row['pred']}")
+        
+        all_data = data_io.load_data()
+        logging.info("Data loaded")
+
+        processed_df = model.preprocess(all_data)        
+        args.predict_season = int(args.predict_season.split("/")[0])
+        predict_data = processed_df.loc[
+            (processed_df["season"] == args.predict_season)
+            & (processed_df["matchday"] == args.predict_matchday)
+            & (processed_df["division"] == args.predict_division)
+        ].copy()
+        logging.info("Data processed")
+
+        logging.info("Starting to calculate features")
+        df_features = model.calculate_features(
+            processed_df, predict_data
+        ) 
+        logging.info("Features calculated")
+
+        logging.info("Making predictions")
+        predict_data = model.predict(df_features)
+        logging.info("Predictions made")
         data_io.save_predictions(predict_data)
+
+        logging.info(f"Matchday {args.predict_matchday} - LaLiga - Division {args.predict_division} - Season {args.predict_season}")
+        logging.info("=" * 70)
+        for _, row in predict_data.iterrows():
+            logging.info(f"{row['home_team']:^30s} vs {row['away_team']:^30s} --> {row['pred']}")

@@ -42,7 +42,7 @@ def win_lost_index(row, df_conf_dict):
     return win_punct, lost_punct
 
 
-def inform_win_lost_index(df, df_calculate, nseasons):
+def inform_win_lost_index(df, df_calculate, depth: int):
     """
     Adds win and loss punctuation to the DataFrame for each row's season.
 
@@ -51,7 +51,7 @@ def inform_win_lost_index(df, df_calculate, nseasons):
     :return: DataFrame with the win and loss punctuation for each row's season.
     """
     max_season = df_calculate["season"].max()
-    df_recent = df[df["season"] >= (max_season - nseasons)].copy()
+    df_recent = df[df["season"] >= (max_season - depth)].copy()
 
     teams = df_calculate[["home_team", "away_team"]].drop_duplicates()
     df_conf_dict = {
@@ -105,6 +105,7 @@ def inform_relatives_points(df, df_calculate):
     :return: DataFrame with added relative points features
     """
     df_results_dict = {}
+
 
     for season in df_calculate["season"].unique():
         season_data = df[df["season"] == season].copy()

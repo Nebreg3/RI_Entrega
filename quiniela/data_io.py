@@ -58,9 +58,13 @@ def load_historical_data(season: str, depth: int) -> pd.DataFrame:
 
     return data
 
+def load_data():
+    with sqlite3.connect(settings.DATABASE_PATH) as conn:
+        data = pd.read_sql("SELECT * FROM Matches", conn)
+    return data
 
 def save_predictions(predictions):
-    with sqlite3.connect(settings.DATABASE_PATH) as conn:
-        predictions.to_sql(
-            name="Predictions", con=conn, if_exists="append", index=False
-        )
+    predictions_dir = os.path.join(os.path.dirname(__file__), "predictions")
+    os.makedirs(predictions_dir, exist_ok=True)
+    predictions_path = os.path.join(predictions_dir, "predictions.csv")
+    predictions.to_csv(predictions_path, index=False)

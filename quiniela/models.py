@@ -61,9 +61,6 @@ class QuinielaModel:
     ]
     TARGET = "result"
 
-    def __init__(self):
-        """Initialize the QuinielaModel."""
-        pass
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -81,60 +78,47 @@ class QuinielaModel:
         return processed_df
 
     def calculate_features(
-        self, df: pd.DataFrame, start_season, nseasons
+        self, df: pd.DataFrame, df_features, depth: int = float('inf')
     ) -> pd.DataFrame:
         """
         Calculate features for the input DataFrame.
 
         :param df: Input DataFrame containing match data
-        :param start_season: Initial season to consider for feature calculation
-        :param nseasons: Number of seasons to consider for feature calculation
-        :param index_depth: Depth of the index to consider for win and loss calculations
+        :param df_features: DataFrame containing data to calculate features for
+        :param depth: Depth for calculating features, default is infinity
         :return: DataFrame with calculated features
         """
-
-        # if train:
-        #     df_predict = df.loc[
-        #         (df["season"] > (start_season - nseasons))
-        #         & (df["season"] <= start_season)
-        #     ].copy()
-        # elif predict:
-        #     df_predict = df.loc[
-        #         (df["season"] == season_to_predict)
-        #         & (df["matchday"] == matchday_to_predict)
-        #         & (df["division"] == 1)
-        #     ].copy()
 
         logging.info(f"Calculating features for {len(df)} matches")
         start_time = time.time()
         logging.info("Calculating relative points")
-        df_predict = inform_relatives_points(df, df_predict)
+        df_features = inform_relatives_points(df, df_features)
         logging.info(
             f"Relative points calculated in {time.time() - start_time:.2f} seconds"
         )
 
         start_time = time.time()
         logging.info("Calculating win and loss index")
-        df_predict = inform_win_lost_index(df, df_predict, nseasons)
+        df_features = inform_win_lost_index(df, df_features, depth)
         logging.info(
             f"Win and loss index calculated in {time.time() - start_time:.2f} seconds"
         )
 
         start_time = time.time()
         logging.info("Calculating last 5 index")
-        df_predict = last5index(df, df_predict)
+        df_features = last5index(df, df_features)
         logging.info(
             f"Last 5 index calculated in {time.time() - start_time:.2f} seconds"
         )
 
         start_time = time.time()
         logging.info("Calculating last season position")
-        df_predict = last_season_position(df, df_predict)
+        df_features = last_season_position(df, df_features)
         logging.info(
             f"Last season position calculated in {time.time() - start_time:.2f} seconds"
         )
 
-        return df_predict
+        return df_features
 
     def train(self, df_train: pd.DataFrame):
         """Train the model on provided data."""
@@ -169,18 +153,21 @@ class QuinielaModel:
         )
         analyze_model_performance(feature_importance, y_val, y_val_pred, clf)
 
-    def predict_result(
-        self, season: str, matchday: int, depth: int, train=True
-    ) -> pd.DataFrame:
-        """Generate predictions on the provided data."""
+    def predict(self, df_matchday: pd.DataFrame) -> pd.DataFrame:
+        """
+        Generate predictions on the provided data.
+        
+        :param df_matchday: DataFrame with matchday data
+        
+        :return: DataFrame with predictions
+        """
 
-        df = load_matchday(season, 1, matchday)
-        df = self.preprocess(df)
-        df_matchday = self.calculate_features(df, df_matchday, season, depth, False)
         x_predict = df_matchday[self.FEATURES]
 
-        clf = self.load("my_quiniela.model")
-        y_predict = clf.predict(x_predict)
+        le = LabelEncoder()
+        le.fit(df_matchday[self.TARGET])  # Fit the LabelEncoder with the target labels
+
+        y_predict = self.model.predict(x_predict)
         y_predict = le.inverse_transform(y_predict)
         df_matchday["prediction"] = y_predict
         df_matchday["correct"] = df_matchday["result"] == df_matchday["prediction"]

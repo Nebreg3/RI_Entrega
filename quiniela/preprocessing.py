@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+pd.options.mode.chained_assignment = None  # default='warn' #UPSI
 
 def _process_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -11,9 +12,9 @@ def _process_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.dropna(subset=["score"])
     score_parts = df["score"].str.split(":", expand=True)
-    df["home_score"] = pd.to_numeric(score_parts[0], errors="coerce")
-    df["away_score"] = pd.to_numeric(score_parts[1], errors="coerce")
-    df["difference_score"] = abs(df["home_score"] - df["away_score"])
+    df.loc[:, "home_score"] = pd.to_numeric(score_parts[0], errors="coerce")
+    df.loc[:, "away_score"] = pd.to_numeric(score_parts[1], errors="coerce")
+    # df["difference_score"] = abs(df["home_score"] - df["away_score"])
     return df
 
 
