@@ -1,4 +1,5 @@
 """
+PYTHON VERSION USED: 3.7.9
 This script is the entry point for the command-line interface (CLI) of the LaQuiniela model. It uses the argparse module to define the command-line arguments and subcommands for training and predicting with the model.
 
 The script defines two subcommands: train and predict. The train subcommand is used to train the model with historical data, while the predict subcommand is used to make predictions for a specific matchday in a season.
