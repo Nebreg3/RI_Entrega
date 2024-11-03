@@ -115,8 +115,8 @@ class QuinielaModel:
         x_train = df_train[self.FEATURES]
         y_train = df_train[self.TARGET]
 
-        le = LabelEncoder()
-        y_train = le.fit_transform(y_train)
+        self.le = LabelEncoder()
+        y_train = self.le.fit_transform(y_train)
 
         x_train, x_val, y_train, y_val = train_test_split(
             x_train, y_train, test_size=0.1, random_state=40
@@ -124,6 +124,8 @@ class QuinielaModel:
 
         clf = GradientBoostingClassifier()
         clf.fit(x_train, y_train)
+
+        self.model = clf
 
         return clf, x_val, y_val
 
@@ -152,8 +154,8 @@ class QuinielaModel:
         """
 
         x_predict = df_matchday[self.FEATURES]
-
         y_predict = self.model.predict(x_predict)
+        y_predict = self.le.inverse_transform(y_predict)
         df_matchday["prediction"] = y_predict
         df_matchday["correct"] = df_matchday["result"] == df_matchday["prediction"]
         df_matchday = quiniela_format(df_matchday)
@@ -166,34 +168,12 @@ class QuinielaModel:
         with open(filename, "rb") as f:
             model = pickle.load(f)
             assert isinstance(model, cls)
+            if not hasattr(model, 'model'):
+                raise AttributeError("Loaded model instance does not have a `model` attribute. "
+                                    "Ensure it was assigned before saving.")
         return model
 
     def save(self, filename):
         """Save model to a file."""
         with open(os.path.join("..", "models", filename), "wb") as f:
             pickle.dump(self, f)
-
-
-# if __name__ == "__main__":
-#     logging.basicConfig(level=logging.INFO)
-#     model = QuinielaModel()
-#     # Un argument ha de ser nseasons
-#     nseasons = 2
-#     df = load_historical_data("2004/2005", nseasons)
-#     logging.info("Data loaded")
-#     processed_df = model.preprocess(df)
-#     logging.info("Processed data")
-#     logging.info("Starting to calculate features")
-#     df_train = model.calculate_features(
-#         processed_df, 2004, nseasons
-#     )  # Revisar arguments q paso
-#     logging.info("Features calculated")
-#     logging.info("Starting to train model")
-#     clf, x_val, y_val = model.train(df_train)
-#     model.save(model_name)
-#     logging.info(f"Model saved as {model_name}")
-#     model.validate(clf, x_val, y_val)
-
-#     logging.info("Example prediction")
-#     df_matchday = model.predict_result("2005/2006", 1, nseasons)
-#     logging.info(df_matchday)

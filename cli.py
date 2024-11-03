@@ -131,4 +131,4 @@ if __name__ == "__main__":
         logging.info(f"Matchday {args.predict_matchday} - LaLiga - Division {args.predict_division} - Season {args.predict_season}")
         logging.info("=" * 70)
         for _, row in predict_data.iterrows():
-            logging.info(f"{row['home_team']:^30s} vs {row['away_team']:^30s} --> {row['pred']}")
+            logging.info(f"{row['home_team']:^30s} vs {row['away_team']:^30s} --> {row['prediction']}")
