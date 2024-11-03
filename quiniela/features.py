@@ -110,7 +110,6 @@ def inform_relatives_points(df, df_calculate):
     """
     df_results_dict = {}
 
-
     for season in df_calculate["season"].unique():
         season_data = df[df["season"] == season].copy()
 
