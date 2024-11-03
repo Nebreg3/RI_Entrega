@@ -1,29 +1,21 @@
-# Standard library imports
 import os
 import sys
 import pickle
-import sqlite3
-
-# Third-party imports
-import numpy as np
-import pandas as pd
-from pandas import DataFrame
-import matplotlib.pyplot as plt
-import seaborn as sns
-import joblib
-from operator import le
 import logging
 import time
+from operator import le
 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.preprocessing import LabelEncoder
 
-# Sklearn imports
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import LabelEncoder
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Project-specific imports
 from .utils import quiniela_format
 from .preprocessing import (
     _process_scores,
@@ -31,7 +23,6 @@ from .preprocessing import (
     _normalize_dates,
     _process_seasons,
 )
-from .data_io import load_historical_data, load_matchday
 from .features import (
     inform_relatives_points,
     inform_win_lost_index,
@@ -39,7 +30,6 @@ from .features import (
     last_season_position,
 )
 from .validate import analyze_model_performance
-import settings
 
 
 class QuinielaModel:
@@ -60,7 +50,6 @@ class QuinielaModel:
         "last_season_points_away",
     ]
     TARGET = "result"
-
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -164,11 +153,7 @@ class QuinielaModel:
 
         x_predict = df_matchday[self.FEATURES]
 
-        le = LabelEncoder()
-        le.fit(df_matchday[self.TARGET])  # Fit the LabelEncoder with the target labels
-
         y_predict = self.model.predict(x_predict)
-        y_predict = le.inverse_transform(y_predict)
         df_matchday["prediction"] = y_predict
         df_matchday["correct"] = df_matchday["result"] == df_matchday["prediction"]
         df_matchday = quiniela_format(df_matchday)
