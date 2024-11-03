@@ -1,3 +1,7 @@
+"""
+This module contains functions to calculate features for the matches DataFrame.
+"""
+
 import pandas as pd
 import numpy as np
 

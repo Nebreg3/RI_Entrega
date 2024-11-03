@@ -1,3 +1,7 @@
+"""
+This module contains utility functions for model validation and performance analysis.
+"""
+
 import os
 
 import numpy as np

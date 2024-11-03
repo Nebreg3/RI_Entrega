@@ -1,3 +1,9 @@
+"""
+This module contains the QuinielaModel class, which is used to train, validate, and predict soccer match results in 'La Quiniela' style.
+
+The QuinielaModel class includes methods for preprocessing data, calculating features, training a model, validating the model, and generating predictions. The model is based on a GradientBoostingClassifier from scikit-learn.
+"""
+
 import os
 import sys
 import pickle

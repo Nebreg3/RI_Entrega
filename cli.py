@@ -1,3 +1,31 @@
+"""
+This script is the entry point for the command-line interface (CLI) of the LaQuiniela model. It uses the argparse module to define the command-line arguments and subcommands for training and predicting with the model.
+
+The script defines two subcommands: train and predict. The train subcommand is used to train the model with historical data, while the predict subcommand is used to make predictions for a specific matchday in a season.
+
+The train subcommand takes the following arguments:
+- train_season: The starting season for training.
+- train_nseasons: The number of previous seasons to use for training.
+- model_name: The name to save the trained model with.
+- validate: Flag to indicate whether to validate the model after training.
+- depth: Depth of the index win_lose calculation.
+
+The predict subcommand takes the following arguments:
+- predict_season: The season to predict.
+- predict_division: The division to predict (1 or 2).
+- predict_matchday: The matchday to predict.
+- model_name: The name of the model to use for prediction.
+
+An example usage of the CLI would be:
+```
+python cli.py train 2010/2011 10 --model_name my_quiniela.model --validate --depth 20
+```
+or
+```
+python cli.py predict 2019/2020 1 10 --model_name my_quiniela.model
+```
+"""
+
 #!/usr/bin/env python
 import logging
 import argparse
