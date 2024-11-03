@@ -159,6 +159,7 @@ class QuinielaModel:
         df_matchday["prediction"] = y_predict
         df_matchday["correct"] = df_matchday["result"] == df_matchday["prediction"]
         df_matchday = quiniela_format(df_matchday)
+        df_matchday = df_matchday[["season", "division", "matchday", "home_team", "away_team", "result", "prediction", "correct"]] #Comment this line to see all columns and features calculated.
 
         return df_matchday
 
@@ -168,9 +169,6 @@ class QuinielaModel:
         with open(filename, "rb") as f:
             model = pickle.load(f)
             assert isinstance(model, cls)
-            if not hasattr(model, 'model'):
-                raise AttributeError("Loaded model instance does not have a `model` attribute. "
-                                    "Ensure it was assigned before saving.")
         return model
 
     def save(self, filename):
