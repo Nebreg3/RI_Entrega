@@ -17,8 +17,6 @@ This repository contains the code and resources for the La Quiniela model, which
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
 
 ### Installation
 
